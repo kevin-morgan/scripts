@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## 2022.09.19
+## 2023.06.10
 
 export tmpVER=''
 export tmpDIST=''
@@ -370,7 +370,7 @@ if [[ -n "$tmpDIST" ]]; then
         [[ "$isDigital" == '16.04' ]] && DIST='xenial';
         [[ "$isDigital" == '18.04' ]] && DIST='bionic';
         [[ "$isDigital" == '20.04' ]] && DIST='focal';
-        [[ "$isDigital" == '22.04' ]] && DIST='jammy';
+        # [[ "$isDigital" == '22.04' ]] && DIST='jammy';
       }
     }
     LinuxMirror=$(selectMirror "$Relese" "$DIST" "$VER" "$tmpMirror")
@@ -607,8 +607,10 @@ for COMP in `echo -en 'gzip\nlzma\nxz'`
 $UNCOMP < /tmp/$NewIMG | cpio --extract --verbose --make-directories --no-absolute-filenames >>/dev/null 2>&1
 
 if [[ "$linux_relese" == 'debian' ]] || [[ "$linux_relese" == 'ubuntu' ]]; then
+CurrentKernelVersion=`ls -1 ./lib/modules 2>/dev/null |head -n1`
+[ -n "$CurrentKernelVersion" ] && SelectLowmem="di-utils-exit-installer,driver-injection-disk-detect,fdisk-udeb,netcfg-static,parted-udeb,partman-auto,partman-ext3,ata-modules-${CurrentKernelVersion}-di,efi-modules-${CurrentKernelVersion}-di,sata-modules-${CurrentKernelVersion}-di,scsi-modules-${CurrentKernelVersion}-di,scsi-nic-modules-${CurrentKernelVersion}-di" || SelectLowmem=""
 cat >/tmp/boot/preseed.cfg<<EOF
-d-i debian-installer/locale string en_US
+d-i debian-installer/locale string en_US.UTF-8
 d-i debian-installer/country string US
 d-i debian-installer/language string en
 
@@ -616,6 +618,7 @@ d-i console-setup/layoutcode string us
 
 d-i keyboard-configuration/xkb-keymap string us
 d-i lowmem/low note
+d-i anna/choose_modules_lowmem multiselect $SelectLowmem
 
 d-i netcfg/choose_interface select $interfaceSelect
 
@@ -676,6 +679,7 @@ tasksel tasksel/first multiselect minimal
 d-i pkgsel/update-policy select none
 d-i pkgsel/include string openssh-server
 d-i pkgsel/upgrade select none
+d-i apt-setup/services-select multiselect
 
 popularity-contest popularity-contest/participate boolean false
 
@@ -792,4 +796,3 @@ else
   [[ -f "/boot/vmlinuz" ]] && rm -rf "/boot/vmlinuz"
   echo && ls -AR1 "$HOME/loader"
 fi
-
