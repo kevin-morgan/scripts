@@ -755,7 +755,7 @@ text
 unsupported_hardware
 vnc
 skipx
-timezone --isUtc Asia/Hong_Kong
+timezone --isUtc Asia/Shanghai
 #ONDHCP network --bootproto=dhcp --onboot=on
 network --bootproto=static --ip=$IPv4 --netmask=$MASK --gateway=$GATE --nameserver=$ipDNS --onboot=on
 bootloader --location=mbr --append="rhgb quiet crashkernel=auto"
