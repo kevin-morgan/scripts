@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## 2023.09.05
+## 2024.06.25
 
 
 export tmpVER=''
@@ -296,6 +296,7 @@ if [ "$setNet" == "0" ]; then
   dependence ip
   [ -n "$interface" ] || interface=`getInterface`
   iAddr=`ip addr show dev $interface |grep "inet.*" |head -n1 |grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\/[0-9]\{1,2\}'`
+  echo "$iAddr" |grep '^10\.' |grep '/32$' >/dev/null && iAddr=`echo "$iAddr" |sed 's/\/32/\/24/'` # Fix GCP
   ipAddr=`echo ${iAddr} |cut -d'/' -f1`
   ipMask=`netmask $(echo ${iAddr} |cut -d'/' -f2)`
   ipGate=`ip route show default |grep "^default" |grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' |head -n1`
@@ -318,7 +319,7 @@ elif [[ "$Relese" == 'CentOS' ]]; then
   dependence wget,awk,grep,sed,cut,cat,lsblk,cpio,gzip,find,dirname,basename,file,xz;
 fi
 [ -n "$tmpWORD" ] && dependence openssl
-[[ -n "$tmpWORD" ]] && myPASSWORD="$(openssl passwd -1 "$tmpWORD")";
+[[ -n "$tmpWORD" ]] && myPASSWORD=`openssl passwd -1 "$tmpWORD"`;
 [[ -z "$myPASSWORD" ]] && myPASSWORD='$1$4BJZaD0A$y1QykUnJ6mXprENfwpseH0';
 
 tempDisk=`getDisk`; [ -n "$tempDisk" ] && IncDisk="$tempDisk"
@@ -755,7 +756,7 @@ text
 unsupported_hardware
 vnc
 skipx
-timezone --isUtc Asia/Shanghai
+timezone --isUtc Asia/Hong_Kong
 #ONDHCP network --bootproto=dhcp --onboot=on
 network --bootproto=static --ip=$IPv4 --netmask=$MASK --gateway=$GATE --nameserver=$ipDNS --onboot=on
 bootloader --location=mbr --append="rhgb quiet crashkernel=auto"
